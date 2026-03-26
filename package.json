@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --check server.js",
+    "start": "node server.js",
+    "check-db": "node -e \"require('./config/db').checkConnection().then(r=>{console.log('DB OK:',r.now);process.exit(0);}).catch(e=>{console.error('DB FAIL:',e.message||e);console.error(e);process.exit(1);});\""
   },
   "keywords": [],
   "author": "",

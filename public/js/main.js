@@ -6,6 +6,21 @@ const state = {
   userId: null
 };
 
+
+const defaultWasteTypes = [
+  { id: -1, name: 'Пластик', description: 'Подходит для переработки и снижает загрязнение.', eco_points_per_kg: 10 },
+  { id: -2, name: 'Бумага', description: 'Сохраняет древесные ресурсы.', eco_points_per_kg: 8 },
+  { id: -3, name: 'Стекло', description: 'Может перерабатываться многократно.', eco_points_per_kg: 7 },
+  { id: -4, name: 'Металл', description: 'Экономит энергию и сырьё.', eco_points_per_kg: 12 },
+  { id: -5, name: 'Органика', description: 'Уменьшает объем мусора на полигонах.', eco_points_per_kg: 6 }
+];
+
+const defaultCollectionPoints = [
+  { id: -1, name: 'ЭкоПункт Центр', city: 'Москва', address: 'ул. Тверская, 10' },
+  { id: -2, name: 'Зелёный приём', city: 'Санкт-Петербург', address: 'Невский пр., 25' },
+  { id: -3, name: 'Recycle Hub', city: 'Казань', address: 'ул. Баумана, 15' }
+];
+
 const images = {
   plastic: 'images/plastic.svg',
   paper: 'images/paper.svg',
@@ -161,9 +176,15 @@ async function loadData() {
     api('/reports')
   ]);
 
-  state.wasteTypes = wasteResult.status === 'fulfilled' ? wasteResult.value : [];
-  state.points = pointsResult.status === 'fulfilled' ? pointsResult.value : [];
-  state.reports = reportsResult.status === 'fulfilled' ? reportsResult.value : [];
+  state.wasteTypes = wasteResult.status === 'fulfilled' && Array.isArray(wasteResult.value) && wasteResult.value.length
+    ? wasteResult.value
+    : defaultWasteTypes;
+  state.points = pointsResult.status === 'fulfilled' && Array.isArray(pointsResult.value) && pointsResult.value.length
+    ? pointsResult.value
+    : defaultCollectionPoints;
+  state.reports = reportsResult.status === 'fulfilled' && Array.isArray(reportsResult.value)
+    ? reportsResult.value
+    : [];
 
   renderWasteGallery();
   renderBenefits();
@@ -172,8 +193,9 @@ async function loadData() {
 
   const failed = [wasteResult, pointsResult, reportsResult].find((r) => r.status === 'rejected');
   if (failed) {
-    if (hasEl('report-message')) byId('report-message').textContent = failed.reason.message;
-    if (hasEl('profile-message')) byId('profile-message').textContent = failed.reason.message;
+    const warning = `${failed.reason.message} Используется локальный режим: список типов отходов и пунктов приема загружен из шаблона.`;
+    if (hasEl('report-message')) byId('report-message').textContent = warning;
+    if (hasEl('profile-message')) byId('profile-message').textContent = warning;
   }
 }
 
@@ -212,7 +234,7 @@ if (hasEl('delete-account')) {
     saveLocalReports();
 
     try {
-      await api(`/api/users/${state.userId}`, { method: 'DELETE' });
+      await api(`/users/${state.userId}`, { method: 'DELETE' });
     } catch {
       // Если сервер не поддерживает удаление, удаляем только локальные данные
     }
