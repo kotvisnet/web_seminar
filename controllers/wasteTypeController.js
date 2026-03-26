@@ -1,6 +1,5 @@
 const model = require('../models/wasteTypeModel');
 
-// Получить все
 const getAll = async (req, res) => {
     try {
         const data = await model.getAll();
@@ -10,7 +9,18 @@ const getAll = async (req, res) => {
     }
 };
 
-// Создать
+const getById = async (req, res) => {
+    try {
+        const item = await model.getById(req.params.id);
+        if (!item) {
+            return res.status(404).json({ error: 'Waste type not found' });
+        }
+        res.json(item);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 const create = async (req, res) => {
     const { name, description, eco_points_per_kg } = req.body;
 
@@ -22,34 +32,38 @@ const create = async (req, res) => {
     }
 };
 
-// Обновить
 const update = async (req, res) => {
     const { id } = req.params;
     const { name, description, eco_points_per_kg } = req.body;
 
     try {
         const item = await model.update(id, name, description, eco_points_per_kg);
+        if (!item) {
+            return res.status(404).json({ error: 'Waste type not found' });
+        }
         res.json(item);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Удалить
 const remove = async (req, res) => {
     const { id } = req.params;
 
     try {
-        await model.remove(id);
+        const deleted = await model.remove(id);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Waste type not found' });
+        }
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Экспорт (ОДИН!)
 module.exports = {
     getAll,
+    getById,
     create,
     update,
     remove
