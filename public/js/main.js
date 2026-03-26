@@ -212,7 +212,7 @@ if (hasEl('delete-account')) {
     saveLocalReports();
 
     try {
-      await api(`/api/users/${state.userId}`, { method: 'DELETE' });
+      await api(`/users/${state.userId}`, { method: 'DELETE' });
     } catch {
       // Если сервер не поддерживает удаление, удаляем только локальные данные
     }
