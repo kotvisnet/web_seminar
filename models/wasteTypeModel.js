@@ -1,0 +1,41 @@
+const db = require('../config/db');
+
+// Получить все типы отходов
+const getAll = async () => {
+    const result = await db.query('SELECT * FROM waste_types');
+    return result.rows;
+};
+
+// Создать новый тип отходов
+const create = async (name, description, eco_points_per_kg) => {
+    const result = await db.query(
+        'INSERT INTO waste_types (name, description, eco_points_per_kg) VALUES ($1, $2, $3) RETURNING *',
+        [name, description, eco_points_per_kg]
+    );
+    return result.rows[0];
+};
+
+// Обновить тип отходов
+const update = async (id, name, description, eco_points_per_kg) => {
+    const result = await db.query(
+        'UPDATE waste_types SET name=$1, description=$2, eco_points_per_kg=$3 WHERE id=$4 RETURNING *',
+        [name, description, eco_points_per_kg, id]
+    );
+    return result.rows[0];
+};
+
+// Удалить тип отходов
+const remove = async (id) => {
+    await db.query(
+        'DELETE FROM waste_types WHERE id=$1',
+        [id]
+    );
+};
+
+// Экспорт
+module.exports = {
+    getAll,
+    create,
+    update,
+    remove
+};
